@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Найди ошибки оформления в деловом письме</title>
+    <style>
+        /* Базовые переменные: чисто белый фон, светло-серые подложки и акцент #003DAE */
+        :root {
+            --bg-page: #FFFFFF;
+            --bg-card: #FFFFFF;
+            --bg-subtle: #F8FAFC;
+            --border-color: #E2E8F0;
+            --border-strong: #CBD5E1;
+            --accent: #003DAE;
+            --accent-hover: #002E85;
+            --accent-soft: rgba(0, 61, 174, 0.08);
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            /* Статусные цвета */
+            --error-bg: #FEF2F2;
+            --error-border: #EF4444;
+            --error-text: #991B1B;
+            --success-bg: #F0FDF4;
+            --success-border: #22C55E;
+            --success-text: #166534;
+            --neutral-bg: #F8FAFC;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --shadow-card: 0 6px 28px rgba(15, 23, 42, 0.05);
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            padding: 24px 16px;
+        }
+
+        /* Основной контейнер тренажёра */
+        .trainer-wrapper {
+            max-width: 1040px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            padding: 32px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 12px 10px;
+            }
+            .trainer-wrapper {
+                padding: 20px 16px;
+            }
+        }
+
+        /* Шапка упражнения без декоративных пилюль */
+        .trainer-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            padding-bottom: 22px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-text {
+            max-width: 660px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.015em;
+            margin-bottom: 6px;
+        }
+
+        .instruction {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        .score-box {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14.5px;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+        }
+
+        .score-count {
+            color: var(--accent);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .score-box.complete {
+            background: var(--success-bg);
+            border-color: #BBF7D0;
+            color: var(--success-text);
+        }
+
+        .score-box.complete .score-count {
+            color: var(--success-text);
+        }
+
+        /* Двухколоночная рабочая зона */
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 880px) {
+            .workspace-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Макет окна электронного письма */
+        .email-client {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .email-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            background: #F1F5F9;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .window-dots span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #CBD5E1;
+        }
+
+        .email-client-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+        }
+
+        /* Поля шапки письма */
+        .email-meta {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .meta-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .meta-label {
+            color: var(--text-muted);
+            font-weight: 500;
+            min-width: 48px;
+            flex-shrink: 0;
+        }
+
+        .meta-value {
+            color: var(--text-main);
+        }
+
+        /* Тело письма */
+        .email-body {
+            background: var(--bg-card);
+            padding: 20px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Кликабельные зоны (Hotspots) */
+        .hotspot {
+            position: relative;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .hotspot:hover {
+            background-color: var(--bg-subtle);
+            border-color: var(--border-strong);
+        }
+
+        .hotspot:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* Состояние найденной ошибки */
+        .hotspot.found {
+            background-color: var(--error-bg);
+            border-color: var(--error-border);
+        }
+
+        .hotspot.found.active {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.16);
+        }
+
+        /* Состояние нейтральной зоны при клике */
+        .hotspot.neutral-checked {
+            background-color: var(--bg-subtle);
+            border-color: #94A3B8;
+        }
+
+        /* Бейдж номера найденной ошибки на макете */
+        .hotspot-badge {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--font-sans);
+            font-size: 11.5px;
+            font-weight: 700;
+            font-style: normal;
+            text-transform: none;
+            letter-spacing: normal;
+            color: #FFFFFF;
+            background-color: var(--error-border);
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            width: fit-content;
+        }
+
+        .hotspot.found .hotspot-badge {
+            display: inline-flex;
+        }
+
+        /* Специфическое намеренно плохое оформление внутри макета */
+        .subject-caps {
+            font-weight: 700;
+            font-size: 14.5px;
+            color: #0F172A;
+            letter-spacing: 0.02em;
+        }
+
+        .clean-text {
+            font-size: 14.5px;
+            color: var(--text-main);
+        }
+
+        .flowery-text {
+            font-size: 14.5px;
+            color: var(--text-main);
+            line-height: 1.65;
+        }
+
+        .mixed-fonts-text {
+            line-height: 1.65;
+            color: var(--text-main);
+        }
+
+        .font-serif-big {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 16.5px;
+        }
+
+        .font-italic-block {
+            font-family: 'Trebuchet MS', sans-serif;
+            font-style: italic;
+            font-size: 13.5px;
+            color: #334155;
+        }
+
+        .font-courier {
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .raw-links-block {
+            font-size: 13.5px;
+            color: var(--text-main);
+            word-break: break-all;
+        }
+
+        .fake-raw-url {
+            color: #1D4ED8;
+            text-decoration: underline;
+            display: block;
+            margin-top: 4px;
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+
+        .cta-caps {
+            font-weight: 700;
+            font-size: 14px;
+            color: #0F172A;
+            letter-spacing: 0.015em;
+        }
+
+        /* Эталонное исправленное письмо (переключаемый режим) */
+        .clean-email-view {
+            display: none;
+            background: var(--bg-card);
+            padding: 20px 18px;
+        }
+
+        .clean-email-view.visible {
+            display: block;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .clean-banner {
+            background: var(--success-bg);
+            border: 1px solid #BBF7D0;
+            color: var(--success-text);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 13.5px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .clean-letter-body {
+            font-size: 14.5px;
+            color: var(--text-main);
+            line-height: 1.65;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .clean-letter-body ul {
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .clean-anchor {
+            color: var(--accent);
+            text-decoration: underline;
+            font-weight: 500;
+        }
+
+        /* Правая панель обратной связи и чек-листа */
+        .feedback-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .feedback-card {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .feedback-card.state-error {
+            background: var(--error-bg);
+            border-color: #FECACA;
+        }
+
+        .feedback-card.state-neutral {
+            background: var(--bg-subtle);
+            border-color: var(--border-strong);
+        }
+
+        .feedback-card.state-complete {
+            background: var(--success-bg);
+            border-color: #BBF7D0;
+        }
+
+        .feedback-status-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .feedback-card.state-error .feedback-status-label {
+            color: var(--error-text);
+        }
+
+        .feedback-card.state-complete .feedback-status-label {
+            color: var(--success-text);
+        }
+
+        .feedback-heading {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            line-height: 1.35;
+        }
+
+        .feedback-card.state-error .feedback-heading {
+            color: var(--error-text);
+        }
+
+        .feedback-card.state-complete .feedback-heading {
+            color: var(--success-text);
+        }
+
+        .feedback-desc {
+            font-size: 14.5px;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .feedback-tip {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            font-size: 13.5px;
+            color: var(--text-main);
+        }
+
+        /* Кнопки управления */
+        .controls-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background-color: var(--accent);
+            color: #FFFFFF;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 12px 18px;
+            font-family: inherit;
+            font-size: 14.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.99);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            background-color: transparent;
+            color: var(--accent);
+            border: 1.5px solid var(--accent);
+            border-radius: var(--radius-md);
+            padding: 10px 18px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--accent-soft);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<main class="trainer-wrapper">
+    <!-- Заголовок и счётчик без лишних пилюль -->
+    <header class="trainer-header">
+        <div class="header-text">
+            <h1>Найди ошибки оформления в деловом письме</h1>
+            <p class="instruction">Нажимай на фрагменты электронного письма слева, которые оформлены неудачно и мешают адресату быстро понять задачу.</p>
+        </div>
+        <div class="score-box" id="scoreBox" aria-live="polite">
+            <span>Найдено ошибок:</span>
+            <span class="score-count" id="scoreCount">0 из 5</span>
+        </div>
+    </header>
+
+    <div class="workspace-grid">
+        <!-- Левая колонка: макет электронного письма -->
+        <section class="email-client" aria-label="Макет электронного письма">
+            <div class="email-toolbar">
+                <div class="window-dots" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span class="email-client-label" id="clientModeLabel">Входящее письмо — нажмите на проблемные места</span>
+            </div>
+
+            <!-- Шапка письма (режим поиска ошибок) -->
+            <div id="brokenEmailContainer">
+                <div class="email-meta">
+                    <div class="meta-row">
+                        <span class="meta-label">Кому:</span>
+                        <span class="meta-value">Александра Смирнова &lt;a.smirnova@company.ru&gt;</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Тема:</span>
+                        <div class="hotspot subject-caps" tabindex="0" role="button" data-zone="err-caps-subject" style="flex: 1; padding: 6px 10px;">
+                            <div class="hotspot-badge">✓ Ошибка №1</div>
+                            СРОЧНО!! НУЖНО СОГЛАСОВАТЬ МАКЕТЫ ПО ПРОЕКТУ ДО 18:00!!!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Тело письма с заложенными ошибками и нейтральными зонами -->
+                <div class="email-body">
+                    <!-- Нейтральная зона 1: Приветствие -->
+                    <div class="hotspot clean-text" tabindex="0" role="button" data-zone="neutral-greeting">
+                        Здравствуйте, Александра!
+                    </div>
+
+                    <!-- Ошибка 2: Многословность и слишком образные описания -->
+                    <div class="hotspot flowery-text" tabindex="0" role="button" data-zone="err-flowery">
+                        <div class="hotspot-badge">✓ Ошибка №2</div>
+                        В бушующем океане наших предрелизных рабочих задач мы, словно опытные мореплаватели, стремимся привести наш совместный корабль проекта «Азимут» в тихую гавань успешного запуска, в связи с чем хотелось бы выразить искреннюю надежду на то, что вы сможете погрузиться в атмосферу приложенных материалов и поделиться своим бесценным видением по поводу визуальной составляющей страниц.
+                    </div>
+
+                    <!-- Ошибка 3: Разные шрифты и курсив -->
+                    <div class="hotspot mixed-fonts-text" tabindex="0" role="button" data-zone="err-fonts">
+                        <div class="hotspot-badge">✓ Ошибка №3</div>
+                        <span class="font-serif-big">Обращаем ваше особое внимание на то, что </span>
+                        <span class="font-italic-block">в третьем блоке главной страницы мы полностью пересмотрели логику расположения карточек тарифов, так как предыдущий вариант показался команде маркетинга слишком перегруженным и не отвечающим текущим задачам привлечения корпоративных клиентов, </span>
+                        <span class="font-courier">а также обновили цветовую палитру кнопок.</span>
+                    </div>
+
+                    <!-- Ошибка 4: Гигантские ссылки -->
+                    <div class="hotspot raw-links-block" tabindex="0" role="button" data-zone="err-links">
+                        <div class="hotspot-badge">✓ Ошибка №4</div>
+                        Посмотреть актуальную версию макетов и таблицу с комментариями можно по этим ссылкам:
+                        <span class="fake-raw-url">https://cloud-storage.example.com/projects/2026/q4/department-marketing-design/azimut-landing-final-v14-edited-by-ivanov-approved?usp=sharing&authuser=0&session_token=984729384729384729384729384</span>
+                        <span class="fake-raw-url">https://docs-sheets.example.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit#gid=1948572910&range=A1:Z94&filter=active_comments_only</span>
+                    </div>
+
+                    <!-- Ошибка 5: Капслок и давление в финале письма -->
+                    <div class="hotspot cta-caps" tabindex="0" role="button" data-zone="err-caps-cta">
+                        <div class="hotspot-badge">✓ Ошибка №5</div>
+                        ПРОСЬБА НЕ ЗАДЕРЖИВАТЬ ОБРАТНУЮ СВЯЗЬ И ОТПИСАТЬСЯ КАК МОЖНО СКОРЕЕ, ТАК КАК ДЕДЛАЙН УЖЕ ГОРИТ!!
+                    </div>
+
+                    <!-- Нейтральная зона 2: Подпись -->
+                    <div class="hotspot clean-text" tabindex="0" role="button" data-zone="neutral-sign">
+                        С уважением,<br>
+                        Игорь Волков, менеджер проектов
+                    </div>
+                </div>
+            </div>
+
+            <!-- Скрытый эталонный вариант письма (открывается после нахождения всех 5 ошибок) -->
+            <div class="clean-email-view" id="cleanEmailView">
+                <div class="clean-banner">
+                    Так выглядит это же письмо после редактуры: без крика, метафор, разных шрифтов и громоздких ссылок.
+                </div>
+                <div class="email-meta" style="margin: -20px -18px 18px -18px;">
+                    <div class="meta-row">
+                        <span class="meta-label">Кому:</span>
+                        <span class="meta-value">Александра Смирнова &lt;a.smirnova@company.ru&gt;</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Тема:</span>
+                        <span class="meta-value" style="font-weight: 600;">Макеты лендинга «Азимут» — ждём правки до 18:00</span>
+                    </div>
+                </div>
+                <div class="clean-letter-body">
+                    <p>Здравствуйте, Александра!</p>
+                    <p>Подготовили обновлённые макеты лендинга для проекта «Азимут». Что изменили в этой версии:</p>
+                    <ul>
+                        <li>упростили расположение карточек тарифов в третьем блоке;</li>
+                        <li>обновили цвета акцентных кнопок.</li>
+                    </ul>
+                    <p>
+                        Материалы готовы к проверке: <span class="clean-anchor">макеты в облаке</span> и <span class="clean-anchor">таблица для комментариев</span>.
+                    </p>
+                    <p>Посмотрите, пожалуйста, до 18:00 сегодняшнего дня, чтобы мы успели передать задачу в разработку.</p>
+                    <p>С уважением,<br>Игорь Волков, менеджер проектов</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Правая колонка: панель обратной связи и чек-лист -->
+        <aside class="feedback-column">
+            <!-- Карточка мгновенного разбора -->
+            <div class="feedback-card" id="feedbackCard" aria-live="polite">
+                <div class="feedback-status-label" id="feedbackStatus">Подсказка к заданию</div>
+                <h2 class="feedback-heading" id="feedbackHeading">Кликните на любую часть письма</h2>
+                <p class="feedback-desc" id="feedbackDesc">
+                    В этом письме спрятаны 5 типичных ошибок оформления, из-за которых адресату тяжело читать текст и хочется отложить ответ. Нажимайте на подозрительные фрагменты, чтобы получить разбор.
+                </p>
+                <div class="feedback-tip hidden" id="feedbackTip"></div>
+            </div>
+
+            <!-- Кнопки после завершения или для сброса -->
+            <div class="controls-bar">
+                <button type="button" class="btn-primary hidden" id="toggleCleanBtn">Показать исправленный вариант письма</button>
+                <button type="button" class="btn-secondary hidden" id="resetBtn">Пройти заново</button>
+            </div>
+        </aside>
+    </div>
+</main>
+
+<script>
+    (function() {
+        // База знаний по всем зонам макета письма
+        const ZONES_DATA = {
+            'err-caps-subject': {
+                isError: true,
+                title: 'Капслок и восклицательные знаки в теме',
+                description: 'В деловой переписке текст КАПСЛОКОМ с тремя восклицательными знаками считывается как крик и давление. Слово «СРОЧНО» без конкретики вызывает у получателя раздражение и защитную реакцию.',
+                tip: 'Как исправить: пишите обычным регистром и сразу указывайте суть и дедлайн в теме — например: «Макеты лендинга „Азимут“ — ждём правки до 18:00».'
+            },
+            'err-flowery': {
+                isError: true,
+                title: 'Многословность и слишком образные описания',
+                description: '«Бушующий океан задач», «корабль проекта в тихую гавань» — художественные метафоры уместны в рассказе, но в рабочем письме они крадут время. Получателю приходится продираться сквозь красивости, чтобы понять, что от него хотят.',
+                tip: 'Как исправить: уберите метафоры и вводные конструкции («в связи с чем», «хотелось бы выразить надежду»). Оставьте факты: что сделано и какое действие нужно от адресата.'
+            },
+            'err-fonts': {
+                isError: true,
+                title: 'Разные шрифты и курсив',
+                description: 'Смешение шрифта с засечками (Georgia), рубленого шрифта и моноширинного Courier создаёт визуальный шум и ломает структуру письма. А длинный абзац курсивом тяжело читать с экрана — буквы сливаются.',
+                tip: 'Как исправить: используйте один стандартный шрифт и единый кегль для всего письма. Для перечислений лучше сделать аккуратный маркированный список.'
+            },
+            'err-links': {
+                isError: true,
+                title: 'Гигантские ссылки',
+                description: 'Длинные технические ссылки с параметрами отслеживания растягивают письмо, выглядят неопрятно и настораживают получателя (похожи на фишинг). Кроме того, по такому адресу непонятно, куда именно ведёт переход.',
+                tip: 'Как исправить: зашейте ссылки в осмысленный текст (анкор), например: «макеты в облаке» и «таблица для комментариев».'
+            },
+            'err-caps-cta': {
+                isError: true,
+                title: 'Капслок и паника в призыве к действию',
+                description: 'Финал письма — самая важная точка, где формулируется следующий шаг. Написание просьбы капслоком («ПРОСЬБА НЕ ЗАДЕРЖИВАТЬ... ДЕДЛАЙН ГОРИТ!!») перекладывает тревогу отправителя на адресата и портит деловой тон.',
+                tip: 'Как исправить: спокойно назовите конкретный срок и причину: «Посмотрите, пожалуйста, до 18:00, чтобы мы успели передать макеты в разработку».'
+            },
+            'neutral-greeting': {
+                isError: false,
+                title: 'Здесь всё в порядке',
+                description: 'Приветствие оформлено вежливо, нейтрально и без лишних восклицаний. Поищите другие проблемные фрагменты в теме или теле письма.'
+            },
+            'neutral-sign': {
+                isError: false,
+                title: 'Здесь всё в порядке',
+                description: 'Подпись лаконична: указаны имя, фамилия и роль отправителя, без лишних декоративных шрифтов и баннеров. Продолжайте поиск ошибок выше.'
+            }
+        };
+
+        const TOTAL_ERRORS = 5;
+        const foundErrors = new Set();
+        let isShowingClean = false;
+
+        // Элементы DOM
+        const hotspots = document.querySelectorAll('.hotspot');
+        const scoreBox = document.getElementById('scoreBox');
+        const scoreCount = document.getElementById('scoreCount');
+        const feedbackCard = document.getElementById('feedbackCard');
+        const feedbackStatus = document.getElementById('feedbackStatus');
+        const feedbackHeading = document.getElementById('feedbackHeading');
+        const feedbackDesc = document.getElementById('feedbackDesc');
+        const feedbackTip = document.getElementById('feedbackTip');
+        const toggleCleanBtn = document.getElementById('toggleCleanBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const brokenEmailContainer = document.getElementById('brokenEmailContainer');
+        const cleanEmailView = document.getElementById('cleanEmailView');
+        const clientModeLabel = document.getElementById('clientModeLabel');
+
+        // Отображение обратной связи в правой карточке
+        function renderFeedback(zoneKey) {
+            const data = ZONES_DATA[zoneKey];
+            if (!data) return;
+
+            // Снимаем активную рамку со всех хотспотов и ставим на текущий
+            hotspots.forEach(el => el.classList.remove('active'));
+            const activeHotspot = document.querySelector(`.hotspot[data-zone="${zoneKey}"]`);
+            if (activeHotspot) {
+                activeHotspot.classList.add('active');
+            }
+
+            if (data.isError) {
+                feedbackCard.className = 'feedback-card state-error';
+                feedbackStatus.textContent = 'Ошибка оформления найдена';
+                feedbackHeading.textContent = data.title;
+                feedbackDesc.textContent = data.description;
+                feedbackTip.textContent = data.tip;
+                feedbackTip.classList.remove('hidden');
+            } else {
+                feedbackCard.className = 'feedback-card state-neutral';
+                feedbackStatus.textContent = 'Корректный фрагмент';
+                feedbackHeading.textContent = data.title;
+                feedbackDesc.textContent = data.description;
+                feedbackTip.classList.add('hidden');
+            }
+        }
+
+        // Обновление счётчика и проверка завершения
+        function updateProgress() {
+            const count = foundErrors.size;
+            scoreCount.textContent = `${count} из ${TOTAL_ERRORS}`;
+
+            if (count > 0) {
+                resetBtn.classList.remove('hidden');
+            }
+
+            if (count === TOTAL_ERRORS) {
+                scoreBox.classList.add('complete');
+                toggleCleanBtn.classList.remove('hidden');
+            }
+        }
+
+        // Обработка клика или нажатия Enter/Space по области письма
+        function handleZoneActivation(el) {
+            const zoneKey = el.getAttribute('data-zone');
+            const data = ZONES_DATA[zoneKey];
+            if (!data) return;
+
+            if (data.isError) {
+                const isNew = !foundErrors.has(zoneKey);
+                foundErrors.add(zoneKey);
+                el.classList.add('found');
+
+                updateProgress();
+                renderFeedback(zoneKey);
+
+                // Если только что найдена последняя 5-я ошибка, дополняем статус
+                if (isNew && foundErrors.size === TOTAL_ERRORS) {
+                    feedbackStatus.textContent = 'Отлично! Все 5 ошибок найдены';
+                }
+            } else {
+                el.classList.add('neutral-checked');
+                renderFeedback(zoneKey);
+            }
+        }
+
+        hotspots.forEach(el => {
+            el.addEventListener('click', () => handleZoneActivation(el));
+            el.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleZoneActivation(el);
+                }
+            });
+        });
+
+        // Переключение между проблемным макетом и эталонным письмом
+        function setCleanView(showClean) {
+            isShowingClean = showClean;
+            if (showClean) {
+                brokenEmailContainer.classList.add('hidden');
+                cleanEmailView.classList.add('visible');
+                clientModeLabel.textContent = 'Исправленное письмо — образец оформления';
+                toggleCleanBtn.textContent = 'Вернуться к письму с ошибками';
+
+                feedbackCard.className = 'feedback-card state-complete';
+                feedbackStatus.textContent = 'Задание выполнено';
+                feedbackHeading.textContent = 'Вы нашли все 5 ошибок оформления!';
+                feedbackDesc.textContent = 'Сравните исправленный макет слева: единый шрифт, спокойный тон без капслока, короткие списки вместо метафор и аккуратные ссылки в тексте.';
+                feedbackTip.classList.add('hidden');
+            } else {
+                brokenEmailContainer.classList.remove('hidden');
+                cleanEmailView.classList.remove('visible');
+                clientModeLabel.textContent = 'Входящее письмо — нажмите на проблемные места';
+                toggleCleanBtn.textContent = 'Показать исправленный вариант письма';
+            }
+        }
+
+        toggleCleanBtn.addEventListener('click', () => {
+            setCleanView(!isShowingClean);
+        });
+
+        // Сброс тренажёра в исходное состояние
+        resetBtn.addEventListener('click', () => {
+            foundErrors.clear();
+            setCleanView(false);
+
+            hotspots.forEach(el => {
+                el.classList.remove('found', 'active', 'neutral-checked');
+            });
+
+            scoreBox.classList.remove('complete');
+            scoreCount.textContent = `0 из ${TOTAL_ERRORS}`;
+            toggleCleanBtn.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+
+            feedbackCard.className = 'feedback-card';
+            feedbackStatus.textContent = 'Подсказка к заданию';
+            feedbackHeading.textContent = 'Кликните на любую часть письма';
+            feedbackDesc.textContent = 'В этом письме спрятаны 5 типичных ошибок оформления, из-за которых адресату тяжело читать текст и хочется отложить ответ. Нажимайте на подозрительные фрагменты, чтобы получить разбор.';
+            feedbackTip.classList.add('hidden');
+        });
+    })();
+</script>
+
+</body>
+</html>
